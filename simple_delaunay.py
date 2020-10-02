@@ -56,21 +56,19 @@ class Point:
 
 class Triangle:
     def __init__(self, a, b, c):
-        self.a = a
-        self.b = b
-        self.c = c
-
         self.v = [None] * 3
         self.v[0] = a
         self.v[1] = b
         self.v[2] = c
 
-        self.edges = [[self.a, self.b],
-                      [self.b, self.c],
-                      [self.c, self.a]]
+        self.edges = [[self.v[0], self.v[1]],
+                      [self.v[1], self.v[2]],
+                      [self.v[2], self.v[0]]]
+
+        self.neighbour = [None] * 3
 
     def HasVertex(self, point):
-        if (self.a == point) or (self.b == point) or (self.c == point):
+        if (self.v[0] == point) or (self.v[1] == point) or (self.v[2] == point):
             return True
         return False
 
@@ -135,8 +133,7 @@ class Delaunay_Triangulation:
             newTriangle = Triangle(each_edge[0], each_edge[1], p)
             self.triangulation.append(newTriangle)
 
-    def export(self):
-
+    def Remove_Super_Triangles(self):
         # Removing the super triangle using Lamba function
         onSuper = lambda triangle: triangle.HasVertex(self.SuperPointA) or triangle.HasVertex(
             self.SuperPointB) or triangle.HasVertex(self.SuperPointC)
@@ -144,6 +141,8 @@ class Delaunay_Triangulation:
         for triangle_new in self.triangulation[:]:
             if onSuper(triangle_new):
                 self.triangulation.remove(triangle_new)
+
+    def export(self):
 
         ps = [p for t in self.triangulation for p in t.v]
 
@@ -156,3 +155,16 @@ class Delaunay_Triangulation:
         ts = [(ps.index(t.v[0]), ps.index(t.v[1]), ps.index(t.v[2])) for t in self.triangulation]
 
         return x_s, y_s, ts
+
+    def Find_Neighbours(self):
+        # Function to find the neighbours of the Delaunay triangles
+        for one in self.triangulation:
+            edge = 0
+            for this_edge in one.edges:
+                edge = (edge + 1) % 3
+                for other in self.triangulation:
+                    if one == other:
+                        continue
+                    for that_edge in other.edges:
+                        if SharedEdge(this_edge, that_edge):
+                            one.neighbour[edge] = other
