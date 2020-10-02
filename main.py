@@ -29,6 +29,13 @@ DT = d.Delaunay_Triangulation(WIDTH, HEIGHT)
 for x, y in zip(xs, ys):
     DT.AddPoint(d.Point(x, y))
 
+# Remove the super triangle on the outside
+DT.Remove_Super_Triangles()
+
+# Helps in determining the neighbours of triangles. I felt it might help in the future
+# Remove this to speed up triangle generation
+# DT.Find_Neighbours()
+
 XS, YS, TS = DT.export()
 
 # Creating a Triangulation without specifying the triangles results in the
